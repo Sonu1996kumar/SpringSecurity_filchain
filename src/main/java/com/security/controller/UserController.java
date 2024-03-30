@@ -1,5 +1,6 @@
 package com.security.controller;
 
+import com.security.dto.LoginDto;
 import com.security.dto.PropertyUserDto;
 import com.security.entity.PropertyUser;
 import com.security.service.UserService;
@@ -20,6 +21,7 @@ public class UserController {
     }
 
     //http://localhost:8080/api/v1/addUser
+    //Sign Up Feature
     @PostMapping("/addUser")
     public ResponseEntity<String>addUser(@RequestBody PropertyUserDto dto) throws Exception {
         PropertyUser user = userService.addUser(dto);
@@ -28,6 +30,21 @@ public class UserController {
         }else{
             return new ResponseEntity<>("sign up successful ", HttpStatus.CREATED);
         }
+
+    }
+
+    //Sign In Feature
+    @PostMapping("/login")
+    public ResponseEntity<String>login(@RequestBody LoginDto logindto) throws Exception {
+        boolean status = userService.verifyLogin(logindto);
+        if (!status) {
+            return new ResponseEntity<>("sign in failed Due to invalid Credential ", HttpStatus.UNAUTHORIZED);
+        }else{
+            return new ResponseEntity<>("sign in successful ", HttpStatus.OK );
+        }
+//        System.out.println(logindto.getUserName());
+//        System.out.println(logindto.getPassword());
+//        return new ResponseEntity<>("sign in successful ", HttpStatus.OK);
 
     }
 }
