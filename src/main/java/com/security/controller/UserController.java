@@ -1,15 +1,14 @@
 package com.security.controller;
 
+import com.security.dto.JwtResponse;
 import com.security.dto.LoginDto;
 import com.security.dto.PropertyUserDto;
 import com.security.entity.PropertyUser;
 import com.security.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,18 +32,39 @@ public class UserController {
 
     }
 
-    //Sign In Feature
-    @PostMapping("/login")
-    public ResponseEntity<String>login(@RequestBody LoginDto logindto) throws Exception {
-        boolean status = userService.verifyLogin(logindto);
-        if (!status) {
-            return new ResponseEntity<>("sign in failed Due to invalid Credential ", HttpStatus.UNAUTHORIZED);
-        }else{
-            return new ResponseEntity<>("sign in successful ", HttpStatus.OK );
-        }
+    //Sign In Feature without jwt token
+//    @PostMapping("/login")
+//    public ResponseEntity<String>login(@RequestBody LoginDto logindto) throws Exception {
+//        boolean status = userService.verifyLogin(logindto);
+//        if (!status) {
+//            return new ResponseEntity<>("sign in failed Due to invalid Credential ", HttpStatus.UNAUTHORIZED);
+//        }else{
+//            return new ResponseEntity<>("sign in successful ", HttpStatus.OK );
+//        }
 //        System.out.println(logindto.getUserName());
 //        System.out.println(logindto.getPassword());
 //        return new ResponseEntity<>("sign in successful ", HttpStatus.OK);
 
+    //}
+
+    //signed in feature with jwt token
+
+    @PostMapping("/login")
+    public ResponseEntity<?>login(@RequestBody LoginDto logindto) throws Exception {
+        String jwtToken = userService.verifyLogin(logindto);
+
+        if (jwtToken!=null) {
+            JwtResponse jwtResponse =new JwtResponse();
+            jwtResponse.setToken(jwtToken);
+
+            return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("sign in failed due to Invalid Credential ", HttpStatus.UNAUTHORIZED);
+
+        }
+    }
+    @GetMapping("/profile")//@AuthenticationPrincipal current login user ka detailed dega
+    public PropertyUser getCurrentProfile(@AuthenticationPrincipal PropertyUser propertyUser){
+        return propertyUser;
     }
 }
